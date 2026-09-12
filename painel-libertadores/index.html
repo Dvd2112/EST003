@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Copa Libertadores em Números (2012–2026)</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <h1>🏆 Copa Libertadores em Números (2012–2026)</h1>
+    <p class="subtitle">
+      Painel interativo para análise do desempenho histórico de clubes e países
+      participantes da Copa Libertadores da América entre 2012 e 2026, comparando
+      vitórias, gols marcados/sofridos, títulos e desempenho ofensivo/defensivo por edição.
+    </p>
+    <p class="source">
+      <strong>Fonte dos dados:</strong> registros públicos de resultados da Copa
+      Libertadores (2012–2026), organizados e tratados pelo autor do trabalho.
+      <strong>Período:</strong> 2012–2026.
+    </p>
+  </header>
+
+  <nav class="filters" id="filters">
+    <div class="filter-group">
+      <label class="filter-label">País</label>
+      <div class="dropdown" id="countryDropdown">
+        <button type="button" class="dropdown-toggle" id="countryDropdownBtn" aria-haspopup="true" aria-expanded="false">
+          <span id="countryDropdownLabel">Todos os países</span>
+          <span class="chev">▾</span>
+        </button>
+        <div class="dropdown-menu" id="countryDropdownMenu" hidden>
+          <div class="dropdown-actions">
+            <button type="button" id="selectAllCountries">Selecionar todos</button>
+            <button type="button" id="clearAllCountries">Limpar</button>
+          </div>
+          <div id="countryChecks" class="country-checklist"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Ano</label>
+      <div class="dropdown" id="yearDropdown">
+        <button type="button" class="dropdown-toggle" id="yearDropdownBtn" aria-haspopup="true" aria-expanded="false">
+          <span id="yearDropdownLabel">2012–2026</span>
+          <span class="chev">▾</span>
+        </button>
+        <div class="dropdown-menu" id="yearDropdownMenu" hidden>
+          <div class="year-mode-toggle">
+            <button type="button" class="year-mode-btn active" data-mode="range">Período</button>
+            <button type="button" class="year-mode-btn" data-mode="single">Ano específico</button>
+          </div>
+
+          <div id="yearRangeMode" class="year-mode-panel">
+            <div class="year-subgroup">
+              <span class="year-subgroup-label">De</span>
+              <div class="year-chip-list" id="yearFromList"></div>
+            </div>
+            <div class="year-subgroup">
+              <span class="year-subgroup-label">Até</span>
+              <div class="year-chip-list" id="yearToList"></div>
+            </div>
+          </div>
+
+          <div id="yearSingleMode" class="year-mode-panel" hidden>
+            <div class="year-chip-list" id="yearSingleList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="searchInput">Buscar clube</label>
+      <input type="text" id="searchInput" placeholder="Ex.: River Plate, Flamengo..." />
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Cor dos gráficos</label>
+      <div class="color-mode-toggle">
+        <button type="button" class="color-mode-btn active" data-mode="country">Por país</button>
+        <button type="button" class="color-mode-btn" data-mode="club">Por clube</button>
+      </div>
+    </div>
+
+    <button id="resetFilters" class="reset-btn">Limpar filtros</button>
+  </nav>
+
+  <main>
+    <section class="kpis" id="kpis">
+      <div class="kpi-card">
+        <span class="kpi-value" id="kpiJogos">–</span>
+        <span class="kpi-label">Jogos totais (na seleção)</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value" id="kpiClubeTitulos">–</span>
+        <span class="kpi-label">Clube com mais títulos</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value" id="kpiPaisTitulos">–</span>
+        <span class="kpi-label">País com mais títulos</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value" id="kpiMelhorAtaque">–</span>
+        <span class="kpi-label">Melhor ataque (gols/jogo)</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value" id="kpiMelhorDefesa">–</span>
+        <span class="kpi-label">Melhor defesa (gols/jogo)</span>
+      </div>
+    </section>
+
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h2>Top 10 clubes por número de títulos</h2>
+        <p class="chart-desc">Barras horizontais · cor = país ou clube (ver seletor "Cor dos gráficos") · unidade: títulos conquistados</p>
+        <div class="chart-wrap"><canvas id="chartTitulos"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Distribuição de títulos por país</h2>
+        <p class="chart-desc">Gráfico de rosca · unidade: número de títulos (2012–2025)</p>
+        <div class="chart-wrap"><canvas id="chartPizzaPaises"></canvas></div>
+      </div>
+
+      <div class="chart-card wide">
+        <h2>Evolução de títulos por país ao longo dos anos</h2>
+        <p class="chart-desc">Série temporal (linha) · eixo X = ano da edição · eixo Y = títulos acumulados</p>
+        <div class="chart-wrap"><canvas id="chartLinhaTitulos"></canvas></div>
+      </div>
+
+      <div class="chart-card wide">
+        <h2>Ataque × Defesa por clube</h2>
+        <p class="chart-desc">Dispersão · eixo X = gols marcados/jogo · eixo Y = gols sofridos/jogo (menor é melhor) · tamanho do ponto = títulos · cor = país ou clube (ver seletor "Cor dos gráficos")</p>
+        <div class="chart-wrap"><canvas id="chartScatter"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Top 10 clubes por vitórias</h2>
+        <p class="chart-desc">Barras verticais · cor = país ou clube (ver seletor "Cor dos gráficos") · unidade: número de vitórias</p>
+        <div class="chart-wrap"><canvas id="chartVitorias"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Aproveitamento ofensivo x defensivo por país</h2>
+        <p class="chart-desc">Barras agrupadas · unidade: gols por jogo (média)</p>
+        <div class="chart-wrap"><canvas id="chartPaisGols"></canvas></div>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <h2>Tabela detalhada de clubes</h2>
+      <p class="chart-desc">Clique nos cabeçalhos para ordenar. Filtros acima também se aplicam aqui.</p>
+      <div class="table-wrap">
+        <table id="clubTable">
+          <thead>
+            <tr>
+              <th data-key="name">Clube</th>
+              <th data-key="country">País</th>
+              <th data-key="mp">J</th>
+              <th data-key="w">V</th>
+              <th data-key="d">E</th>
+              <th data-key="l">D</th>
+              <th data-key="gf">GP</th>
+              <th data-key="ga">GC</th>
+              <th data-key="titles">Títulos</th>
+              <th data-key="runner_up">Vices</th>
+            </tr>
+          </thead>
+          <tbody id="clubTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="analysis">
+      <h2>Análise dos dados</h2>
+      <ul>
+        <li>O Brasil concentra a maior parte dos títulos do período (10 dos 14 títulos
+          entre 2012 e 2025), muito à frente da Argentina (3) e da Colômbia (1), refletindo
+          o peso financeiro e competitivo do futebol brasileiro na competição continental.</li>
+        <li>Clubes com o melhor saldo ofensivo nem sempre são campeões na mesma edição —
+          o gráfico de dispersão Ataque × Defesa mostra times com média de gols/jogo alta
+          (ex.: Palmeiras, River Plate) que, em algumas edições, caem antes da final,
+          sugerindo que consistência defensiva nas fases eliminatórias pesa tanto quanto
+          o poder ofensivo na fase de grupos.</li>
+        <li>Países com participação mais recente ou irregular (Venezuela, Bolívia) somam
+          muitos jogos, mas taxas de vitória bem menores que Brasil e Argentina, indicando
+          maior distância competitiva entre as confederações do que entre os clubes
+          isoladamente.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong>Fonte dos dados:</strong> dados compilados a partir de registros públicos de
+      resultados da Copa Libertadores (2012–2026), organizados e tratados pelo autor do
+      trabalho.</p>
+    <p><strong>Observações metodológicas:</strong> jogos decididos em pênaltis contam como
+      resultado do tempo normal/prorrogação para fins de gols marcados/sofridos; o
+      resultado do confronto (avanço de fase/título) segue o desempate real da
+      competição. Dados de 2026 incluem apenas jogos já disputados até a data de
+      atualização deste painel.</p>
+    <p>Última atualização: dados até 11/09/2026.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
